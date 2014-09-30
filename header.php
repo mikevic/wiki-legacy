@@ -1,5 +1,6 @@
 <?php
 require 'includes/dbconnect.inc.php';
+require 'includes/functions.inc.php';
 ?>
 <html lang="en">
   <head>

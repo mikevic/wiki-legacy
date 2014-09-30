@@ -14,7 +14,7 @@ $basic_details = mysql_fetch_assoc($result);
 		echo '<div class="row">';
 
 		echo '<h3>'.$details['wiki_section_title'].'</h3>';
-		echo $details['wiki_section_content'];
+		echo clean_wiki($details['wiki_section_content']);
 		echo '<hr>';
 		echo '</div>';
 	}
