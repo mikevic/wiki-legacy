@@ -1,5 +1,8 @@
 <?php
 require 'header.php';
+if(isset($user)) {
+	if((strpos($email, 'aiesec.net') !== false)){
+
 
 //Get Parameters
 if(isset($_GET['committee']) && !empty($_GET['committee'])){
@@ -101,5 +104,9 @@ if($no_of_rows!=0){
 	</div>
 </div>
 <?php
+	} else {
+		echo '<h2>Log in with your myaiesec.net email address';
+	}
+}
 require 'footer.php';
 ?>

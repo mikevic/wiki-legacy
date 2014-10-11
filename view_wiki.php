@@ -1,5 +1,9 @@
 <?php
 require 'header.php';
+
+if(isset($user)){
+	if((strpos($email, 'aiesec.net') !== false)){
+
 $wiki_id = $_GET['id'];
 $result = mysql_query("SELECT * from `basic` WHERE `content_id`=$wiki_id");
 $basic_details = mysql_fetch_assoc($result);
@@ -21,5 +25,9 @@ $basic_details = mysql_fetch_assoc($result);
 ?>
 </div>
 <?php
+	} else {
+		echo '<h2>Log in with your myaiesec.net email address';
+	}
+}
 require 'footer.php';
 ?>

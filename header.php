@@ -1,6 +1,70 @@
 <?php
 require 'includes/dbconnect.inc.php';
 require 'includes/functions.inc.php';
+
+//include google api files
+require_once 'includes/google/Google_Client.php';
+require_once 'includes/google/contrib/Google_Oauth2Service.php';
+
+//start session
+session_start();
+
+$gClient = new Google_Client();
+$gClient->setApplicationName('Wiki Legacy');
+$gClient->setClientId($google_client_id);
+$gClient->setClientSecret($google_client_secret);
+$gClient->setRedirectUri($google_redirect_url);
+$gClient->setDeveloperKey($google_developer_key);
+if ($gClient->getAccessToken()) {
+           $token = $gClient->getAccessToken();
+           $authObj = json_decode($token);
+           $refreshToken = $authObj->refresh_token;
+        }
+
+$google_oauthV2 = new Google_Oauth2Service($gClient);
+
+//If user wish to log out, we just unset Session variable
+if (isset($_REQUEST['reset']))
+{
+  unset($_SESSION['token']);
+  $gClient->revokeToken();
+  header('Location: ' . filter_var($google_redirect_url, FILTER_SANITIZE_URL));
+}
+
+if (isset($_GET['code']))
+{
+    $gClient->authenticate($_GET['code']);
+    $_SESSION['token'] = $gClient->getAccessToken();
+    header('Location: ' . filter_var($google_redirect_url, FILTER_SANITIZE_URL));
+    return;
+}
+
+
+if (isset($_SESSION['token']))
+{
+        $gClient->setAccessToken($_SESSION['token']);
+}
+
+
+if ($gClient->getAccessToken())
+{
+      //Get user details if user is logged in
+      $user                 = $google_oauthV2->userinfo->get();
+      $user_id              = $user['id'];
+      $user_name            = filter_var($user['name'], FILTER_SANITIZE_SPECIAL_CHARS);
+      $email                = filter_var($user['email'], FILTER_SANITIZE_EMAIL);
+      $profile_url          = filter_var($user['link'], FILTER_VALIDATE_URL);
+      $profile_image_url    = filter_var($user['picture'], FILTER_VALIDATE_URL);
+      $personMarkup         = "$email<div><img src='$profile_image_url?sz=50'></div>";
+      $_SESSION['token']    = $gClient->getAccessToken();
+}
+else
+{
+    //get google login url
+    $authUrl = $gClient->createAuthUrl();
+}
+
+
 ?>
 <html lang="en">
   <head>
@@ -47,7 +111,12 @@ require 'includes/functions.inc.php';
           <ul class="nav navbar-nav">
             <li class="active"><a href="index.php">Home</a></li>
             <li><a href="about.php">About</a></li>
+            <li><?php if(isset($user)){ echo '<a class="logout" href="?reset=1">Logout</a>';} else {echo '<a href="'.$authUrl.'">Login with Google</a>';}?></li>
           </ul>
         </div><!--/.nav-collapse -->
       </div>
     </div>
+
+<?php
+
+?>
